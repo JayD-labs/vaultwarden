@@ -1,0 +1,14 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:1.37.3
+    user: "102:105"
+    restart: unless-stopped
+
+    environment:
+      SIGNUPS_ALLOWED: "false"
+
+    ports:
+      - "127.0.0.1:8000:80"
+
+    volumes:
+      - /srv/vaultwarden/data:/data
