@@ -1,10 +1,10 @@
-# Vaultwarden on Raspberry Pi
+# Vaultwarden auf dem Raspberry Pi
 
-Self-hosted Vaultwarden setup on a Raspberry Pi 4, built step by step as a learning and portfolio project.
+Self-hosted Vaultwarden auf einem Raspberry Pi 4 – Schritt für Schritt aufgebaut als Lern- und Portfolio-Projekt.
 
-The goal of this project is not only to run a password manager, but to understand the underlying Linux, Docker, networking, persistence, HTTPS and security concepts.
+Ziel dieses Projekts ist nicht nur, einen eigenen Passwortmanager zu betreiben, sondern dabei die zugrunde liegenden Themen rund um Linux, Docker, Netzwerke, Persistenz, HTTPS und Sicherheit wirklich zu verstehen.
 
-## Current architecture
+## Aktuelle Architektur
 
 ```text
 Mac / iPhone / iPad / Windows
@@ -16,28 +16,28 @@ Mac / iPhone / iPad / Windows
       127.0.0.1:8000
              │
       Vaultwarden
-      Docker container
+      Docker-Container
              │
    /srv/vaultwarden/data
 ```
 
-Vaultwarden itself is not exposed directly to the local network. The container port is bound only to the loopback interface of the Raspberry Pi.
+Vaultwarden wird nicht direkt im Heimnetz veröffentlicht. Der Container-Port ist ausschließlich an das Loopback-Interface des Raspberry Pi gebunden.
 
-## Current status
+## Aktueller Stand
 
 - Debian 13 (trixie), ARM64
-- Docker Engine + Docker Compose installed from the official Docker repository
+- Docker Engine + Docker Compose aus dem offiziellen Docker-Repository
 - Vaultwarden `1.37.3`
-- Container runs as a dedicated non-root UID/GID (`102:105` on the current host)
-- Persistent data stored outside the repository in `/srv/vaultwarden/data`
-- Data directory restricted to the dedicated `vaultwarden` service account
-- Vaultwarden bound to `127.0.0.1:8000`
-- HTTPS access through Tailscale
-- New account registrations disabled after the initial account was created
-- Container health check verified as `healthy`
-- Persistence tested by deleting and recreating the container
+- Container läuft mit einer dedizierten Non-Root-UID/GID (`102:105` auf diesem Host)
+- Persistente Daten liegen außerhalb des Git-Repositories unter `/srv/vaultwarden/data`
+- Datenverzeichnis ist auf den dedizierten Servicebenutzer `vaultwarden` beschränkt
+- Vaultwarden ist nur an `127.0.0.1:8000` gebunden
+- HTTPS-Zugriff über Tailscale
+- Neue Registrierungen wurden nach Erstellung des ersten Accounts deaktiviert
+- Container-Healthcheck erfolgreich als `healthy` geprüft
+- Persistenz durch Löschen und Neuerstellen des Containers getestet
 
-## Repository structure
+## Repository-Struktur
 
 ```text
 .
@@ -46,92 +46,92 @@ Vaultwarden itself is not exposed directly to the local network. The container p
 └── README.md
 ```
 
-Runtime data, backups and secrets are deliberately kept outside Git.
+Laufzeitdaten, Backups und Secrets werden bewusst außerhalb von Git gehalten.
 
 ## Docker Compose
 
-The current Compose configuration uses:
+Die aktuelle Compose-Konfiguration verwendet:
 
-- a pinned Vaultwarden image version instead of `latest`
+- eine fest gepinnte Vaultwarden-Version statt `latest`
 - `restart: unless-stopped`
-- a dedicated non-root UID/GID
-- loopback-only port publishing
-- a bind mount for persistent data
-- disabled public sign-ups
+- eine dedizierte Non-Root-UID/GID
+- ausschließlich lokales Port-Binding über Loopback
+- einen Bind Mount für persistente Daten
+- deaktivierte öffentliche Registrierungen
 
-The host-side data directory is:
+Das Datenverzeichnis auf dem Host lautet:
 
 ```text
 /srv/vaultwarden/data
 ```
 
-The container sees this directory as:
+Im Container ist dieses Verzeichnis eingebunden als:
 
 ```text
 /data
 ```
 
-## Security decisions
+## Sicherheitsentscheidungen
 
-This project intentionally separates configuration from sensitive runtime data.
+Dieses Projekt trennt Konfiguration bewusst von sensiblen Laufzeitdaten.
 
-The following must **never** be committed to this repository:
+Folgende Inhalte dürfen **niemals** in dieses Repository committed werden:
 
 ```text
 .env
-Vaultwarden database files
-RSA/private keys
-backups
-API tokens
-other secrets
+Vaultwarden-Datenbankdateien
+RSA-/Private-Keys
+Backups
+API-Tokens
+sonstige Secrets
 ```
 
-The `.gitignore` already excludes common secret and runtime paths.
+Die `.gitignore` schließt bereits typische Secret- und Laufzeitpfade aus.
 
-The Vaultwarden data directory on the host is restricted with owner-only permissions.
+Das Vaultwarden-Datenverzeichnis auf dem Host ist ausschließlich für den Servicebenutzer zugänglich.
 
-> Note: the UID/GID in `compose.yaml` is host-specific. A different installation should create its own dedicated service account and use that account's numeric UID/GID.
+> Hinweis: Die UID/GID in `compose.yaml` ist host-spezifisch. Bei einer anderen Installation sollte ein eigener Servicebenutzer angelegt und dessen numerische UID/GID verwendet werden.
 
-## Useful checks
+## Nützliche Prüfungen
 
-Validate the Compose configuration:
+Compose-Konfiguration validieren:
 
 ```bash
 docker compose config
 ```
 
-Check the running service:
+Laufenden Dienst prüfen:
 
 ```bash
 sudo docker compose ps
 ```
 
-View recent Vaultwarden logs:
+Letzte Vaultwarden-Logs anzeigen:
 
 ```bash
 sudo docker compose logs --tail=30 vaultwarden
 ```
 
-Test the local HTTP endpoint on the Raspberry Pi:
+Lokalen HTTP-Endpunkt auf dem Raspberry Pi testen:
 
 ```bash
 curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8000/
 ```
 
-A successful response currently returns HTTP `200`.
+Eine erfolgreiche Antwort liefert aktuell HTTP `200`.
 
-## Planned next steps
+## Geplante nächste Schritte
 
-- document the Tailscale HTTPS setup in more detail
-- create and test a backup strategy
-- define an update procedure
-- continue security hardening
-- document restore procedures
-- test Bitwarden clients on macOS, iOS, iPadOS and Windows
-- review the repository for secrets before making it public
+- Tailscale-/HTTPS-Setup ausführlicher dokumentieren
+- Backup-Strategie erstellen und testen
+- Update-Prozess definieren
+- weiteres Security-Hardening
+- Restore-Prozess dokumentieren
+- Bitwarden-Clients unter macOS, iOS, iPadOS und Windows testen
+- Repository vor einer späteren Veröffentlichung nochmals gezielt auf Secrets prüfen
 
-## Project purpose
+## Projektziel
 
-This repository is primarily a learning and portfolio project. The setup is being built manually and incrementally so that every component and security decision is understood rather than copied as a finished stack.
+Dieses Repository ist in erster Linie ein Lern- und Portfolio-Projekt. Das Setup wird bewusst manuell und schrittweise aufgebaut, damit jede Komponente und jede Sicherheitsentscheidung nachvollzogen und verstanden wird, statt nur einen fertigen Stack zu kopieren.
 
-Vaultwarden is an unofficial Bitwarden-compatible server implementation and is not affiliated with Bitwarden, Inc.
+Vaultwarden ist eine inoffizielle, Bitwarden-kompatible Serverimplementierung und nicht mit Bitwarden, Inc. verbunden.
