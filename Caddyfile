@@ -1,4 +1,17 @@
 https://{$VAULT_DOMAIN} {
     tls internal
-    reverse_proxy vaultwarden:80
+
+    handle /healthz {
+        header {
+            Access-Control-Allow-Origin "*"
+            Cross-Origin-Resource-Policy "cross-origin"
+            Cache-Control "no-store"
+        }
+
+        respond "ok" 200
+    }
+
+    handle {
+        reverse_proxy vaultwarden:80
+    }
 }
