@@ -1,0 +1,4 @@
+https://{$VAULT_DOMAIN} {
+    tls internal
+    reverse_proxy vaultwarden:80
+}

@@ -6,9 +6,29 @@ services:
 
     environment:
       SIGNUPS_ALLOWED: "false"
-
-    ports:
-      - "127.0.0.1:8000:80"
+      DOMAIN: "https://${VAULT_DOMAIN:?VAULT_DOMAIN is not set}"
 
     volumes:
       - /srv/vaultwarden/data:/data
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+
+    environment:
+      VAULT_DOMAIN: "${VAULT_DOMAIN:?VAULT_DOMAIN is not set}"
+      
+    ports:
+      - "443:443"
+
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+    depends_on:
+      - vaultwarden
+
+volumes:
+  caddy_data:
+  caddy_config:

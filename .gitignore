@@ -1,5 +1,24 @@
-.env
-data/
-backups/
-secrets/
+# Certificates / PKI
+*.crt
 *.key
+*.pem
+*.p12
+*.pfx
+
+# Secrets
+.env
+.env.*
+!.env.example
+secrets/
+
+# Vaultwarden data / backups
+data/
+backup/
+backups/
+
+# WireGuard
+*.conf
+
+# OS / editor
+.DS_Store
+.vscode/
